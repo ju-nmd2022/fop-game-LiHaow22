@@ -1,6 +1,8 @@
 let game;
-let santaX = 10;
-let santaY = 10;
+
+const gravity = 0.33;
+const drag = 0.3;
+const bounceVelocity = -12.5;
 
 // Create the game
 function setup() {
@@ -18,21 +20,20 @@ function draw() {
 function drawSanta() {
   noStroke();
   fill(238, 60, 47); // Red
-  rect(santaX + 10, santaY + 10, santaX + 20, santaY);
-  rect(santaX, santaY + 20, santaX + 20, santaY + 50);
+  rect(20, 20, 30, 10);
+  rect(10, 30, 30, 60);
 
   fill(223, 203, 165); // Beige
-  rect(santaX, santaY + 30, santaX + 20, santaY);
+  rect(10, 40, 30, 10);
 
   fill(255); // White
-  rect(santaX, santaY + 40, santaX + 20, santaY);
-  rect(santaX + 40, santaY + 20, santaX, santaY);
+  rect(50, 30, 10, 10);
 
   fill(0, 21, 20); // Black
-  rect(santaX, santaY + 50, santaX + 20, santaY);
+  rect(10, 60, 30, 10);
 
   fill(243, 182, 31); // Yellow
-  rect(santaX + 10, santaY + 50, santaX, santaY);
+  rect(20, 60, 10, 10);
 }
 
 class Game {
