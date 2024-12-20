@@ -11,6 +11,7 @@ function preload() {
   santa = loadImage("santa.png");
   broken = loadImage("gift-broken.png");
 }
+
 // ------- Setup canvas
 function setup() {
   createCanvas(500, 600);
@@ -18,24 +19,37 @@ function setup() {
 
   // ------- Create platforms
   for (let i = 0; i < 10; i++) {
-    platforms.push(new Platform(random(width - 40), i * (height / 12)));
+    platforms.push(
+      new Platform(random(width - 40), i * (height / 12), false, random() < 0.3) //random assigns how often the moving platforms should spawn
+    );
   }
-  platforms.push(new Platform(245, 580)); // The first platform
+  platforms.push(new Platform(245, 580, false, false)); // The first platform
 }
 
 function draw() {
   background(107, 159, 219); // Light blue
   player.update();
   player.show();
+
   for (let i = 0; i < platforms.length; i++) {
+    platforms[i].update(); // Update platform positions
     platforms[i].show(); // Show the platforms
 
     // Platform removal if it goes out of screen
     if (platforms[i].y > player.y + 400) {
       platforms.splice(i, 1); // Remove platform from array
-      platforms.push(new Platform(random(width - 40), -50, false, true)); // Add a new platform at the top
+      platforms.push(
+        new Platform(random(width - 40), -10, false, random() < 0.3) //random assigns how often the moving platforms should spawn (above the initial screen)
+      ); // Add a new platform at the top
+    }
+    if (platforms.length <= 10) {
+      console.log("hej");
+      platforms.push(
+        new Platform(random(width - 40), -10, false, random() < 0.3) //random assigns how often the moving platforms should spawn (above the initial screen)
+      );
     }
   }
+
   textSize(20);
   fill(0);
   text(`Score: ${score}`, 10, 30);
@@ -55,26 +69,40 @@ function checkKey() {
   }
 }
 
-function randomBrokenLoop() {
-  let randomBroken = Math.floor(Math.random() * 10);
-  return randomBroken;
-}
-console.log(randomBrokenLoop());
-
 class Platform {
-  constructor(x, y, hasBeenLandedOn, isBroken) {
+  constructor(x, y, hasBeenLandedOn, isMoving) {
     this.h = 20;
     this.w = 40;
     this.x = x;
     this.y = y;
-    this.hasBeenLandedOn = false; // Track if player has landed on this platform
-    this.isBroken = random(1) < 0.33; //33% chance of breaking platforms
+    this.vx = 2; // Speed of horizontal movement
+    this.hasBeenLandedOn = hasBeenLandedOn || false; // Track if player has landed on this platform
+    this.isBroken = random(1) < 0.33; // 33% chance of breaking platforms
+    this.isMoving = isMoving || false; // Whether this platform moves
+    this.direction = 1; // 1 for right, -1 for left
+    this.range = 50; // Movement range
+    this.originX = x; // Original position for range calculations
   }
 
   moveDown(y) {
     this.y -= y;
     if (this.y > height) {
       this.y = this.y - height - 50;
+    }
+  }
+
+  update() {
+    // Update position if moving
+    if (this.isMoving) {
+      this.x += this.vx * this.direction;
+
+      // Reverse direction if out of range
+      if (
+        this.x > this.originX + this.range ||
+        this.x < this.originX - this.range
+      ) {
+        this.direction *= -1;
+      }
     }
   }
 
@@ -102,17 +130,17 @@ class Player {
 
   update() {
     if (this.y >= height + this.h) {
-      background(255, 0, 0); // make the background red when losing
-      noLoop(); // stop the draw loop
+      background(255, 0, 0); // Make the background red when losing
+      noLoop(); // Stop the draw loop
     }
     this.x += this.vx; // Move left or right
     if (this.vy < 0 && this.y > 150) {
-      this.vy += this.g; // add gravity
-      this.y += this.vy; // add the velocity y to the y location
+      this.vy += this.g; // Add gravity
+      this.y += this.vy; // Add the velocity y to the y location
     } else if (this.vy < 0) {
       this.vy += this.g;
       for (let i = 0; i < platforms.length; i++) {
-        platforms[i].moveDown(this.vy); // move the platforms down
+        platforms[i].moveDown(this.vy); // Move the platforms down
       }
     } else {
       // Check if has been landed on
@@ -124,7 +152,6 @@ class Player {
           this.vy = 0; // Stop falling
           this.jump(); // Make the player jump again
           score++; // Increase score
-          console.log(`inte landad: ${score}`);
         } else {
           this.vy = 0;
           this.jump();
@@ -140,7 +167,7 @@ class Player {
       }
     }
 
-    // wrap left and right sides
+    // Wrap left and right sides
     if (this.x > width) {
       this.x = 0;
     }
