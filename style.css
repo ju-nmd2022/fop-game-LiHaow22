@@ -1,4 +1,4 @@
-/*html,
+html,
 body {
   height: 100%;
 }
@@ -7,18 +7,7 @@ body {
   margin: 0;
   display: flex;
 
-  /*Center the canvas
+  /*Center the canvas*/
   justify-content: center;
   align-items: center;
-}
-
-*/
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-canvas {
-  display: block;
 }
